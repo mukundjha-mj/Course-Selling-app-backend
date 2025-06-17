@@ -2,8 +2,10 @@ const { Router } = require('express');
 
 const adminRouter = Router();
 
+const { adimnModel } = require("../DB/db")
 
-adminRouter.use(adminMiddleware);
+
+// adminRouter.use(adminMiddleware);
 
 adminRouter.post('/signup', (req, res) => {
     const username = req.body.username;

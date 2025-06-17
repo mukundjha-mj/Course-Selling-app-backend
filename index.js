@@ -19,7 +19,6 @@ app.use("/api/v1/course", courseRouter);
 
 
 
-
 app.listen(3000, () => {
     console.log("server is running on http://localhost:3000");
 })
