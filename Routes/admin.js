@@ -6,7 +6,7 @@ const { z } = require("zod")
 
 const adminRouter = Router();
 
-const { adminModel } = require("../DB/db")
+const { adminModel, courseModel } = require("../DB/db")
 const dotenv = require('dotenv')
 dotenv.config();
 
@@ -25,7 +25,7 @@ adminRouter.post('/signup', async (req, res) => {
 
     const parseDataWithSuccess = requireBody.safeParse(req.body);
 
-    if(!parseDataWithSuccess.success){
+    if (!parseDataWithSuccess.success) {
         res.json({
             message: "Incorrect Format",
             error: parseDataWithSuccess.error
@@ -37,7 +37,7 @@ adminRouter.post('/signup', async (req, res) => {
 
 
     let errorThrown = false;
-    try{
+    try {
         const hashedPassword = await bcrypt.hash(password, 5);
         await adminModel.create({
             email: email,
@@ -45,14 +45,14 @@ adminRouter.post('/signup', async (req, res) => {
             firstName: firstName,
             lastName: lastName
         })
-    } catch(error){
+    } catch (error) {
         res.json({
             error: "User already exist"
         })
         errorThrown = true;
     }
 
-    if(!errorThrown){
+    if (!errorThrown) {
         res.json({
             message: "You are Registered."
         })
@@ -68,23 +68,23 @@ adminRouter.post('/signin', async (req, res) => {
         email: email
     })
 
-    if(!findAdmin){
+    if (!findAdmin) {
         res.status(403).json({
             message: "User dose not exist"
         })
         return
     }
-    
+
     const passwordMatch = await bcrypt.compare(password, findAdmin.password);
 
-    if(passwordMatch){
+    if (passwordMatch) {
         const token = jwt.sign({
             id: findAdmin._id.toString()
         }, process.env.JWT_SECRET);
         res.json({
             token: token
         });
-    } else{
+    } else {
         res.status(403).json({
             message: "Incorrect credentials"
         })
@@ -93,22 +93,29 @@ adminRouter.post('/signin', async (req, res) => {
 
 adminRouter.use(adminMiddleware);
 
-adminRouter.post('/course', (req, res)=>{
-    res.json({
-        message: "signin endpoint"
-    })
-})
-
-
-adminRouter.put('/course', adminMiddleware, (req, res)=>{
+adminRouter.post('/course', async (req, res) => {
     const adminId = req.userId;
-    
+
+    const { title, description, imageUrl, Price } = req.body;
+    const course = await courseModel.create({
+        title, description, imageUrl, Price, creatorId: adminId
+    })
+    res.json({
+        message: "course created",
+        courseId: course._id
+    })
+})
+
+
+adminRouter.put('/course', adminMiddleware, (req, res) => {
+    const adminId = req.userId;
+
     res.json({
         message: "signin endpoint"
     })
 })
 
-adminRouter.get('/course/bulk', (req, res)=>{
+adminRouter.get('/course/bulk', (req, res) => {
     res.json({
         message: "signin endpoint"
     })
